@@ -178,7 +178,7 @@ const sendAction = async () => {
     })
     .then(async finalizedTx => {
       const onHash = (hash: string) => {
-        trackSendEvents(SendEventType.SendComplete, {
+                trackSendEvents(SendEventType.SendComplete, {
           network: network.value.name,
         });
         activityState.addActivities(
@@ -195,11 +195,13 @@ const sendAction = async () => {
         );
         isSendDone.value = true;
         if (getCurrentContext() === 'popup') {
+          console.log('closing popup');
           setTimeout(() => {
             isProcessing.value = false;
             router.go(-2);
           }, 4500);
         } else {
+          console.log('closing window');
           setTimeout(() => {
             isProcessing.value = false;
             window.close();
@@ -218,6 +220,7 @@ const sendAction = async () => {
               web3
                 .sendSignedTransaction(bufferToHex(signedTx.serialize()))
                 .on('transactionHash', onHash)
+                .on('receipt', () => router.go(0))
                 .on('error', (error: any) => {
                   txActivity.status = ActivityStatus.failed;
                   activityState.addActivities([txActivity], {
